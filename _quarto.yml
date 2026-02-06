@@ -14,6 +14,8 @@ website:
             file: starter-analysis-exercise/starter-analysis-exercise.qmd
           - text: "READy Exercise"
             href: ready-exercise/report.html
+          - text: "Data Exercise"
+            file: data-exercise/data-exercise.qmd
       - icon: github 
         href: https://github.com/anissawdv/anissawallerdelvalle-portfolio        
 format:
