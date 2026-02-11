@@ -1,0 +1,312 @@
+---
+title: "CDC Data Analysis Exercise"
+author: "Anissa Waller Del Valle"
+format: html
+---
+
+
+## Overview of the Data
+
+
+I selected the **Lyme disease public use line-listed data without georgraphy, 2022 - 2023 dataset**, available on the Center for Disease Control and Prevention's website. This contains publc health surveillance data that was reported to the CDC by U.S. states and territories through the National Notifiable Diseases Surveillance System (NNDSS). Data include both demographic characteristics (age, sex, race, ethnicity) and clinical characteristics (reported year, case status, omonth of illness onset, presecence of symptoms).
+
+
+The dataset can be accessed through the following link: https://data.cdc.gov/d/9mtj-y2ba
+
+
+## Loading the Data
+
+
+```{r}        
+# Load libraries.
+library("tidyverse")
+library("dplyr")
+library("ggplot2")
+```
+
+
+```{r}
+# I downloaded the dataset from the CDC's website and put it into the cdcdata-exercise folder. I want to double-check that my .CSV file is accessible.
+
+
+list.files()
+```
+
+
+```{r}
+# Load the dataset.
+lymedisease_rawdata <- read_csv("Lyme_disease_public_use_line-listed_data_without_geography,_2022-2023_20260211.csv")
+```
+
+
+```{r}
+# Determine the number of rows and columns. There should be 152K rows and 14 columns.  
+dim(lymedisease_rawdata)
+# Explore the data.  
+str(lymedisease_rawdata)
+head(lymedisease_rawdata)
+tail(lymedisease_rawdata)
+```
+
+
+Several variables contain a number of observations coded as **Unknown**, indicating incomplete reporting in sureillance data.
+
+
+```{r}
+ # Explore the data to see how many observations are coded as Unknown per category. Add a line to convert the tibble to a dataframe to obtain a summary table of all counts and percentages for Unknown without R trunacting it.
+ 
+ # Note that Year is numeric; there are no observations coded as Unknown.
+
+
+ unknown_summary <- lymedisease_rawdata %>%
+  summarise(
+    case_status_unknown = sum(Case_status == "Unknown"),
+    sex_unknown = sum(Sex == "Unknown"),
+    age_unknown = sum(Age_cat_yrs == "Unknown"),
+    race_unknown = sum(Race == "Unknown"),
+    ethnicity_unknown = sum(Ethnicity == "Unknown"),
+    onset_unknown = sum(Onset_month == "Unknown"),
+    em_unknown = sum(EM == "Unknown"),
+    arthritis_unknown = sum(Arthritis == "Unknown"),
+    facial_palsy_unknown = sum(Facial_palsy == "Unknown"),
+    radiculo_unknown = sum(Radiculo == "Unknown"),
+    lymph_men_unknown = sum(Lymph_men == "Unknown"),
+    enceph_unknown = sum(Enceph == "Unknown"),
+    av_block_unknown = sum(Av_block == "Unknown"),
+   
+    # Report as percentage.
+    case_status_unknown_pct = mean(Case_status == "Unknown") * 100,
+    sex_unknown_pct = mean(Sex == "Unknown") * 100,
+    age_unknown_pct = mean(Age_cat_yrs == "Unknown") * 100,
+    race_unknown_pct = mean(Race == "Unknown") * 100,
+    ethnicity_unknown_pct = mean(Ethnicity == "Unknown") * 100,
+    onset_unknown_pct = mean(Onset_month == "Unknown") * 100,
+    em_unknown_pct = mean(EM == "Unknown") * 100,
+    arthritis_unknown_pct = mean(Arthritis == "Unknown") * 100,
+    facial_palsy_unknown_pct = mean(Facial_palsy == "Unknown") * 100,
+    radiculo_unknown_pct = mean(Radiculo == "Unknown") * 100,
+    lymph_men_unknown_pct = mean(Lymph_men == "Unknown") * 100,
+    enceph_unknown_pct = mean(Enceph == "Unknown") * 100,
+    av_block_unknown_pct = mean(Av_block == "Unknown") * 100
+  )
+```
+```{r}
+# Convert to data frame.
+unknown_summary_df <- as.data.frame(unknown_summary)
+
+
+# View table.
+unknown_summary_df
+```
+
+
+I will focus on the following variables for this exercise:
+- Year. This is the reporting year. No observations coded as Unknown.
+- Case_Status. This is the surveillance case classification as determined by local and state public health authorities. No observations coded as Unknown.
+- Sex. This is the patient's sex. 1.02% observations coded as Unknown.
+- Age. This is the patient's age, in 5-year age categories. 0.38% observations coded as Unknown.
+- Race. This is the patient's race. 43.2% observations coded as Unknown.
+
+
+All other variables have over 50% of observations coded as Unknown.
+
+
+## Cleaning the Data
+
+
+```{r}
+# Next, clean and process the dataset.
+# Convert Unknown to NA.
+
+
+lymedisease_cleandata <- lymedisease_rawdata %>%
+  select(Year, Case_status, Sex, Age_cat_yrs, Race) %>% # Select variables.
+  mutate(
+    Case_status = ifelse(Case_status == "Unknown", NA, Case_status),
+    Sex = ifelse(Sex == "Unknown", NA, Sex),
+    Age_cat_yrs = ifelse(Age_cat_yrs == "Unknown", NA, Age_cat_yrs),
+    Race = ifelse(Race == "Unknown", NA, Race)
+  ) %>%
+
+
+# Convert to factors for categorical analysis.
+mutate(
+    Case_status = as.factor(Case_status),
+    Sex = as.factor(Sex),
+    Age_cat_yrs = as.factor(Age_cat_yrs),
+    Race = as.factor(Race)
+  ) %>%
+# Less than 2% of observations under the Sex and Age categories are coded as NA. I do not feel that imputing missing values is appropiate with this dataset, so I will instead remove the missing data for these categories. I will keep the missing data for the race category, as I do not feel that imputing missing data or removing the data entirely is appropiate here.
+
+
+filter(!is.na(Case_status), !is.na(Sex), !is.na(Age_cat_yrs))
+
+
+glimpse(lymedisease_cleandata)
+```
+
+
+## Exploring the Data
+
+
+```{r}
+# Now that the data is cleaned, create a summary table for the categorical variables.
+
+
+summary_table <- lymedisease_cleandata %>%
+  summarise(
+    total = n(),
+   
+    # Case status counts.
+    case_status_probable = sum(Case_status == "Probable"),
+    case_status_confirmed = sum(Case_status == "Confirmed"),
+   
+    # Sex counts.
+    sex_male = sum(Sex == "Male"),
+    sex_female = sum(Sex == "Female"),
+   
+    # Age counts (all 5-year categories to 100+).
+    age_0_4 = sum(Age_cat_yrs == "0-4"),
+    age_5_9 = sum(Age_cat_yrs == "5-9"),
+    age_10_14 = sum(Age_cat_yrs == "10-14"),
+    age_15_19 = sum(Age_cat_yrs == "15-19"),
+    age_20_24 = sum(Age_cat_yrs == "20-24"),
+    age_25_29 = sum(Age_cat_yrs == "25-29"),
+    age_30_34 = sum(Age_cat_yrs == "30-34"),
+    age_35_39 = sum(Age_cat_yrs == "35-39"),
+    age_40_44 = sum(Age_cat_yrs == "40-44"),
+    age_45_49 = sum(Age_cat_yrs == "45-49"),
+    age_50_54 = sum(Age_cat_yrs == "50-54"),
+    age_55_59 = sum(Age_cat_yrs == "55-59"),
+    age_60_64 = sum(Age_cat_yrs == "60-64"),
+    age_65_69 = sum(Age_cat_yrs == "65-69"),
+    age_70_74 = sum(Age_cat_yrs == "70-74"),
+    age_75_79 = sum(Age_cat_yrs == "75-79"),
+    age_80_84 = sum(Age_cat_yrs == "80-84"),
+    age_85_89 = sum(Age_cat_yrs == "85-89"),
+    age_90_94 = sum(Age_cat_yrs == "90-94"),
+    age_95_99 = sum(Age_cat_yrs == "95-99"),
+    age_100_plus = sum(Age_cat_yrs == "100+"),
+   
+    # Race counts, including NA to account for missing data.
+    race_white = sum(Race == "White"),
+    race_black = sum(Race == "Black or African American"),
+    race_asian = sum(Race == "Asian"),
+    race_other = sum(Race == "Other"),
+    race_na = sum(is.na(Race))
+  )
+
+
+# Convert counts to percentages.
+summary_table_pct <- summary_table %>%
+  mutate(across(-total, ~ . / total * 100))
+
+
+# Convert to a data frame.
+as.data.frame(summary_table)
+as.data.frame(summary_table_pct)
+
+
+# View table.
+print(summary_table, n = 1, width = Inf)
+print (summary_table_pct, n = 1, width = Inf)
+```
+
+
+```{r}
+# Explore the distribution of categorical variables.
+
+
+ggplot(lymedisease_cleandata, aes(x = Case_status)) +
+  geom_bar(fill = "steelblue") +
+  labs(title = "Distribution of Case Status", y = "Count", x = "Case Status")
+
+
+# Sex distribution
+ggplot(lymedisease_cleandata, aes(x = Sex)) +
+  geom_bar(fill = "salmon") +
+  labs(title = "Distribution of Sex", y = "Count", x = "Sex")
+
+
+# Age distribution
+ggplot(lymedisease_cleandata, aes(x = Age_cat_yrs)) +
+  geom_bar(fill = "forestgreen") +
+  labs(title = "Distribution of Age Categories", y = "Count", x = "Age Category") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+# Race distribution
+ggplot(lymedisease_cleandata, aes(x = Race)) +
+  geom_bar(fill = "purple") +
+  labs(title = "Distribution of Race", y = "Count", x = "Race") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+- The CDC classified Lyme disease cases as either confirmed or probable. When assessing for Lyme disease, health care providers will consider (1) signs and symptoms of the disease, (2), exposure to infected blacklegged ticks, and (3) results of laboratory tests. Confirmed cases must met all three criteria. In Fig. 1, we can see that most reported cases are coded as probable, rather than confirmed. Probable cases dominate as many patients never get a lab test -- or the results of the lab test were not in prior to reporting it to the NNDSS.
+- In Fig. 2, we see that the number of males with confirmed or probable Lyme disease is higher than the number of females with confirmed or probable Lyme disease. This may be related to behavioral exposure as males, especially in rural or wooded areas, are more likely to engage in outdoor activities (e.g., hiking, hunting, landscaping).
+- In Fig. 3, we see that older individuals (50s - 70s) have higher counts of confirmed or probable Lyme disease in comparision to their younger counterparts. This may also be due to behavioral exposure. This may also be related to healthcare-seeking behavior, as older adults are more likely to seek care consistently.
+- In Fig. 4, we see that those who identify as White have higher counts of confirmed or probable Lyme disease in comparision to other races. This may be related to the fact that Lyme disease is most common in Northeastern and Upper Midwest states, where the population is predominately White.
+
+
+Below I have split the data by year to see trends over 2022 - 2023.
+
+
+```{r}
+# Count cases by Sex and Year.
+sex_year_summary <- lymedisease_cleandata %>%
+  group_by(Year, Sex) %>%
+  summarise(count = n(), .groups = "drop")
+
+
+# Plot.
+ggplot(sex_year_summary, aes(x = Sex, y = count, fill = as.factor(Year))) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(
+    title = "Lyme Disease Cases by Sex and Year",
+    x = "Sex",
+    y = "Number of Cases",
+    fill = "Year"
+  ) +
+  theme_minimal()
+
+
+age_year_summary <- lymedisease_cleandata %>%
+  group_by(Year, Age_cat_yrs) %>%
+  summarise(count = n(), .groups = "drop")
+
+
+# Plot
+ggplot(age_year_summary, aes(x = Age_cat_yrs, y = count, fill = as.factor(Year))) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(
+    title = "Lyme Disease Cases by Age Group and Year",
+    x = "Age Group (Years)",
+    y = "Number of Cases",
+    fill = "Year"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+race_year_summary <- lymedisease_cleandata %>%
+  group_by(Year, Race) %>%
+  summarise(count = n(), .groups = "drop")
+
+
+# Plot
+ggplot(race_year_summary, aes(x = Race, y = count, fill = as.factor(Year))) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(
+    title = "Lyme Disease Cases by Race and Year",
+    x = "Race",
+    y = "Number of Cases",
+    fill = "Year"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+From these figures, we see that the number of confirmed or probable cases of Lyme disease increased from 2022 to 2023.
+
