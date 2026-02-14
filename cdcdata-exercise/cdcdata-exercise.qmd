@@ -310,3 +310,218 @@ ggplot(race_year_summary, aes(x = Race, y = count, fill = as.factor(Year))) +
 
 From these figures, we see that the number of confirmed or probable cases of Lyme disease increased from 2022 to 2023.
 
+
+
+
+# Synthetic Data Generation 
+This section was contirbuted by Talia C. Swanson
+
+### Creating Your Synthetic Dataset
+------Chat GPT was used to understand why code would not preview correctly missing dataset creation ------
+
+We will first begin with the steps to ensure that the vraibles, observations, and overview of our data looks good.
+```{r}
+set.seed(123)
+
+n <- nrow(lymedisease_cleandata)
+  # This will ensure the synthetic data set contains the same number of observations as the original Lyme dataset#
+```
+
+
+```{r}
+  # This will geneate synthetic data for each variable of your choice 
+simulate_cat <- function(data, varname, n) {
+  probs <- prop.table(table(data[[varname]]))
+  sample(
+    x = names(probs), # Categories
+    size = n,         # Synthetic data rows
+    replace = TRUE,   
+    prob=probs        # Observed probs
+    )
+}
+```
+
+```{r}
+  # Generate synthetic data for Year
+  Year = sample(
+    unique(lymedisease_cleandata$Year),
+    size = n,
+    replace = TRUE,
+    prob = prop.table(table(lymedisease_cleandata$Year))
+  )
+```
+
+```{r}
+  # Generate synthetic data for Case_status
+  Case_status = sample(
+    levels(lymedisease_cleandata$Case_status),
+    size = n,
+    replace = TRUE,
+    prob = prop.table(table(lymedisease_cleandata$Case_status))
+  )
+```
+
+
+```{r}
+  # Generate synthetic data for Sex
+  Sex = sample(
+    levels(lymedisease_cleandata$Sex),
+    size = n,
+    replace = TRUE,
+    prob = prop.table(table(lymedisease_cleandata$Sex))
+  )
+```
+
+
+```{r}
+  # Generate synthetic data for Age categories
+  Age_cat_yrs = sample(
+    levels(lymedisease_cleandata$Age_cat_yrs),
+    size = n,
+    replace = TRUE,
+    prob = prop.table(table(lymedisease_cleandata$Age_cat_yrs))
+  )
+```
+
+
+```{r}
+  # Generate synthetic data for Race
+  Race = sample(
+    levels(lymedisease_cleandata$Race),
+    size = n,
+    replace = TRUE,
+    prob = prop.table(table(lymedisease_cleandata$Race))
+  )
+```
+
+```{r}
+#Combine all synthetic variables into a dataset
+lymedisease_synthetic <- data.frame(
+  Year, Case_status, Sex, Age_cat_yrs, Race
+)
+```
+
+```{r}
+# Convert categorical variables back to factors
+lymedisease_synthetic <- lymedisease_synthetic %>%
+  mutate(
+    Year = as.factor(Year),
+    Case_status = as.factor(Case_status),
+    Sex = as.factor(Sex),
+    Age_cat_yrs = as.factor(Age_cat_yrs),
+    Race = as.factor(Race)
+  )
+```
+
+```{r}
+# Look at first few rows
+head(lymedisease_synthetic)
+
+# Check structure of synthetic datatset
+glimpse(lymedisease_synthetic)
+
+# Quick summary of synthetic dataset
+summary(lymedisease_synthetic)
+```
+
+### Exploring Your Synthetic Data (singular variables)
+Now we can explore and analyze the synthetic data in the same way as the original set. We will look at the distributions for each catergory by looking at their frequency. All graphs and visulizations are generated in hot pink to show distinction of my contribution.
+
+```{r}
+summary_table_synth <- lymedisease_synthetic %>%  #synthetic data marker
+  summarise(
+    total = n(),
+    case_status_probable = sum(Case_status == "Probable"),
+    case_status_confirmed = sum(Case_status == "Confirmed"),
+    sex_male = sum(Sex == "Male"),
+    sex_female = sum(Sex == "Female"),
+    age_0_4 = sum(Age_cat_yrs == "0-4"),
+    # ... other age categories
+    race_white = sum(Race == "White"),
+    race_black = sum(Race == "Black or African American")
+  )
+```
+
+
+```{r}
+summary_table_pct <- summary_table %>% # percents for easier analysis later #
+  mutate(across(-total, ~ . / total * 100))
+
+summary_table_pct
+```
+
+```{r}
+# Bar plot for case status
+ggplot(lymedisease_synthetic, aes(x = Case_status)) +
+  geom_bar(fill = "hotpink") +
+  labs(title = "Synthetic Case Status Distribution", x = "Case Status", y = "Count")
+```
+
+```{r}
+# Bar plot for sex
+ggplot(lymedisease_synthetic, aes(x = Sex)) +
+  geom_bar(fill = "hotpink") +
+  labs(title = "Synthetic Sex Distribution", x = "Sex", y = "Count")
+```
+
+```{r}
+# Bar plot for age
+ggplot(lymedisease_synthetic, aes(x = Age_cat_yrs)) +
+  geom_bar(fill = "hotpink") +
+  labs(title = "Synthetic Age Distribution", x = "Age Category", y = "Count") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{r}
+# Bar plot for race
+ggplot(lymedisease_synthetic, aes(x = Race)) +
+  geom_bar(fill = "hotpink") +
+  labs(title = "Synthetic Race Distribution", x = "Race", y = "Count") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+### Exploring Your Synthetic Data (multiple variables)
+------ Chat GPT was used to help generate the color change for the synthetic data------
+
+Now we will combine multiple variables for analysis, looking at multiple variables that describe our Lyme dataset.
+
+```{r}
+# Count synthetic cases by Sex and Year 
+sex_year_summary <- lymedisease_synthetic %>% # synthetic data marker
+  group_by(Year, Sex) %>%
+  summarise(count = n(), .groups = "drop")
+
+# Plot
+ggplot(sex_year_summary, aes(x = Sex, y = count, fill = as.factor(Year))) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(
+    title = "Synthetic Lyme Disease Cases by Sex and Year",
+    x = "Sex",
+    y = "Number of Cases",
+    fill = "Year"
+  ) +
+  scale_fill_manual(values=c("lightpink", "hotpink")) + # synthetic colors
+  theme_minimal()
+```
+
+```{r}
+# Count synthetic cases by Age category and Year
+age_year_summary <- lymedisease_synthetic %>% # Synthetic data marker
+  group_by(Year, Age_cat_yrs) %>%
+  summarise(count = n(), .groups = "drop")
+
+# Plot
+ggplot(age_year_summary, aes(x = Age_cat_yrs, y = count, fill = as.factor(Year))) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(
+    title = "Synthetic Lyme Disease Cases by Age Group and Year",
+    x = "Age Group (Years)",
+    y = "Number of Cases",
+    fill = "Year"
+  ) +
+  scale_fill_manual(values=c("pink", "hotpink")) + # synthetic colors
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+The synthetic dataset was generated to match the structure and distributions of the original cleaned Lyme disease data. Categorical variables (Year, Case_status, Sex, Age_cat_yrs, Race) were sampled. The exploratory analysis (summary tables and bar plots) shows that the synthetic data roughly mirrors the trends in the original data , maintain simulated values. 
