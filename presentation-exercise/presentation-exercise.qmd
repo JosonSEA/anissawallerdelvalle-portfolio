@@ -932,6 +932,10 @@ tab_header(
     title = md("**Star Wars Character Favorability Summary**"),
     subtitle = "Percentages based on survey respondents"
   ) %>%
+
+tab_caption(
+    md("*This table displays the percentage of respondents who view Star Wars characters favorably, neutrally, unfavorably, or are unfamiliar with the character. Additionally, the table reports net favorability. This is the difference between favorable and unfavorable responses, which provides a concise metric for comparing overall audience sentiment across characters. Like the above figure, these data indicate that Luke Skywalker is the most favorable character and that Jar Jar Binks is the least favorable character in Star Wars among the characters included in the poll.*")
+  )
 ```
 
-This table displays the percentage of respondents who view Star Wars characters favorably, neutrally, unfavorably, or are unfamiliar with the character. Additionally, the table reports net favorability. This is the difference between favorable and unfavorable responses, which provides a concise metric for comparing overall audience sentiment across characters. Like the above figure, these data indicate that Luke Skywalker is the most favorable character and that Jar Jar Binks is the least favorable character in Star Wars among the characters included in the poll. 
+
