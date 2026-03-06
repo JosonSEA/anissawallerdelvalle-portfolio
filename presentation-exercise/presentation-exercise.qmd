@@ -10,7 +10,9 @@ For this exercise, I will recreate the following figure from FiveThirtyEight's a
 ![Original FiveThirtyEight Figure](fivethirtyeight-starwars-originalfigure.png)
 *Original visualization from FiveThirtyEight.*
 
-The data used to recreate this figure comes from FiveThirtyEight's publically available GitHub repository and is located within the star-wars-survey dataset: https://github.com/fivethirtyeight/data/tree/master/star-wars-survey
+The data used to recreate this figure comes from FiveThirtyEight's publically available GitHub repository and is located within the star-wars-survey dataset: https://github.com/fivethirtyeight/data/tree/master/star-wars-survey. 
+
+Note that favori
 
 ## Load Data
 
