@@ -15,9 +15,10 @@ library(tidyverse)
 library(tidymodels)
 library(dplyr)
 library(ggplot2)
+library(here)
 
 # Load the data and inspect.
-data <- read_csv("fitting-exercise/Mavoglurant_A2121_nmpk.csv")
+data <- read_csv(here("Mavoglurant_A2121_nmpk.csv"))
 glimpse(data)
 ```
 ```{r}
