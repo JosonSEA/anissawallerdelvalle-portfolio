@@ -18,7 +18,7 @@ library(ggplot2)
 library(here)
 
 # Load the data and inspect.
-data <- read_csv(here("Mavoglurant_A2121_nmpk.csv"))
+data <- read_csv(here("fitting-exercise","Mavoglurant_A2121_nmpk.csv"))
 glimpse(data)
 ```
 ```{r}
@@ -240,4 +240,126 @@ metrics(log_full_preds, truth = SEX, estimate = .pred_class)
 roc_auc(log_full_preds, truth = SEX, .pred_1)
 
 # These data indicate that variables such as weight and sex are correlated with sex. The Kappa value is 0.741 and the ROC-AUC is 0.975, indicating good model discrimination. 
+```
+
+# Module 10 Introduction 
+
+Module 10 is centered aroung improving models. Below is the exercise for Module 10. **Make sure you run all scripts provided above.**
+
+# Load packages and data. 
+```{r}
+library(tidyverse)
+library(tidymodels)
+library(here)
+library(dplyr)
+library(ggplot2)
+
+# Set random seed. 
+rngseed <- 1234
+
+# Load and prep data. 
+data <- read_csv(here("fitting-exercise","Mavoglurant_A2121_nmpk.csv"))
+
+# Keep OCC = 1
+data_occ1 <- data %>%
+  filter(OCC == 1)
+
+# Baseline (TIME = 0)
+baseline_data <- data_occ1 %>%
+  filter(TIME == 0)
+
+# Compute Y (sum of DV excluding TIME = 0)
+y_data <- data_occ1 %>%
+  filter(TIME != 0) %>%
+  group_by(ID) %>%
+  summarize(Y = sum(DV, na.rm = TRUE))
+
+# Merge
+combined_data <- baseline_data %>%
+  left_join(y_data, by = "ID")
+
+# Obtain final modeling dataset. Note that RACE is removed as per the instructions. 
+model_data <- combined_data %>%
+  mutate(SEX = factor(SEX)) %>%
+  select(Y, DOSE, AGE, SEX, WT, HT)
+
+# Train and test. 
+set.seed(rngseed)
+
+data_split <- initial_split(model_data, prop = 0.75)
+train_data <- training(data_split)
+test_data  <- testing(data_split)
+```
+
+# Model Fitting 
+
+```{r}
+# Model 1: DOSE only
+model1 <- linear_reg() %>%
+  set_engine("lm") %>%
+  fit(Y ~ DOSE, data = train_data)
+
+# Model 2: All predictors
+model2 <- linear_reg() %>%
+  set_engine("lm") %>%
+  fit(Y ~ DOSE + AGE + SEX + WT + HT, data = train_data)
+
+# Predictions
+pred1 <- predict(model1, train_data) %>%
+  bind_cols(train_data)
+
+pred2 <- predict(model2, train_data) %>%
+  bind_cols(train_data)
+
+# RMSE for models
+rmse_model1 <- rmse(pred1, truth = Y, estimate = .pred)
+rmse_model2 <- rmse(pred2, truth = Y, estimate = .pred)
+
+# Null model (mean prediction)
+mean_y <- mean(train_data$Y)
+rmse_null <- sqrt(mean((train_data$Y - mean_y)^2))
+
+# Print results
+rmse_null
+rmse_model1
+rmse_model2
+```
+
+* The RMSE of the null model is 948. 
+* The RMSE of Model 1 is 703. 
+* The RMSE of Model 2 is 627. 
+
+The lower the RMSE, the better the prediction. 
+* The null model assumes that there is no dose-response relationship (i.e., everyone has the same exposure). 
+* Model 1 suggests that dose is the main driver behind drug exposure. 
+* Model 2 suggests that covariates (age, sex, weight, height) have moderate affect on exposure. The dosage is the main driver, but these patient factors explain residual variability. This has the lowest RMSE value and is currently the best model. 
+
+# Cross Validation 
+```{r} 
+set.seed(rngseed)
+
+folds <- vfold_cv(train_data, v = 10)
+
+# Model 1 CV
+model1_cv <- fit_resamples(
+  linear_reg() %>% set_engine("lm"),
+  Y ~ DOSE,
+  resamples = folds,
+  metrics = metric_set(rmse)
+)
+
+# Model 2 CV
+model2_cv <- fit_resamples(
+  linear_reg() %>% set_engine("lm"),
+  Y ~ DOSE + AGE + SEX + WT + HT,
+  resamples = folds,
+  metrics = metric_set(rmse)
+)
+
+# Collect CV results
+cv_results_model1 <- collect_metrics(model1_cv)
+cv_results_model2 <- collect_metrics(model2_cv)
+
+cv_results_model1
+cv_results_model2
 ```
