@@ -223,7 +223,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidymodels)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>── Attaching packages ────────────────────────────────────── tidymodels 1.4.1 ──
-✔ broom        1.0.11     ✔ rsample      1.3.2 
+✔ broom        1.0.12     ✔ rsample      1.3.2 
 ✔ dials        1.4.2      ✔ tailor       0.1.0 
 ✔ infer        1.1.0      ✔ tune         2.0.1 
 ✔ modeldata    1.5.1      ✔ workflows    1.3.0 
@@ -244,7 +244,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code>here() starts at C:/Users/aniss/Desktop/anissawallerdelvalle-portfolio</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the data and inspect.</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="fu">here</span>(<span class="st">"Mavoglurant_A2121_nmpk.csv"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="fu">here</span>(<span class="st">"fitting-exercise"</span>,<span class="st">"Mavoglurant_A2121_nmpk.csv"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Rows: 2678 Columns: 17
 ── Column specification ────────────────────────────────────────────────────────
@@ -699,6 +699,162 @@ $ HT   &lt;dbl&gt; 1.769997, 1.759850, 1.809847, 1.649993, 1.560052, 1.829862, 1
 1 roc_auc binary         0.975</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="co"># These data indicate that variables such as weight and sex are correlated with sex. The Kappa value is 0.741 and the ROC-AUC is 0.975, indicating good model discrimination. </span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="module-10-introduction" class="level1">
+<h1>Module 10 Introduction</h1>
+<p>Module 10 is centered aroung improving models. Below is the exercise for Module 10. <strong>Make sure you run all scripts provided above.</strong></p>
+</section>
+<section id="load-packages-and-data." class="level1">
+<h1>Load packages and data.</h1>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidymodels)</span>
+<span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(here)</span>
+<span id="cb64-4"><a href="#cb64-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb64-5"><a href="#cb64-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb64-6"><a href="#cb64-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-7"><a href="#cb64-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Set random seed. </span></span>
+<span id="cb64-8"><a href="#cb64-8" aria-hidden="true" tabindex="-1"></a>rngseed <span class="ot">&lt;-</span> <span class="dv">1234</span></span>
+<span id="cb64-9"><a href="#cb64-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-10"><a href="#cb64-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Load and prep data. </span></span>
+<span id="cb64-11"><a href="#cb64-11" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="fu">here</span>(<span class="st">"fitting-exercise"</span>,<span class="st">"Mavoglurant_A2121_nmpk.csv"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Rows: 2678 Columns: 17
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: ","
+dbl (17): ID, CMT, EVID, EVI2, MDV, DV, LNDV, AMT, TIME, DOSE, OCC, RATE, AG...
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Keep OCC = 1</span></span>
+<span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a>data_occ1 <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span></span>
+<span id="cb66-3"><a href="#cb66-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(OCC <span class="sc">==</span> <span class="dv">1</span>)</span>
+<span id="cb66-4"><a href="#cb66-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb66-5"><a href="#cb66-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Baseline (TIME = 0)</span></span>
+<span id="cb66-6"><a href="#cb66-6" aria-hidden="true" tabindex="-1"></a>baseline_data <span class="ot">&lt;-</span> data_occ1 <span class="sc">%&gt;%</span></span>
+<span id="cb66-7"><a href="#cb66-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(TIME <span class="sc">==</span> <span class="dv">0</span>)</span>
+<span id="cb66-8"><a href="#cb66-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb66-9"><a href="#cb66-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute Y (sum of DV excluding TIME = 0)</span></span>
+<span id="cb66-10"><a href="#cb66-10" aria-hidden="true" tabindex="-1"></a>y_data <span class="ot">&lt;-</span> data_occ1 <span class="sc">%&gt;%</span></span>
+<span id="cb66-11"><a href="#cb66-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(TIME <span class="sc">!=</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb66-12"><a href="#cb66-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(ID) <span class="sc">%&gt;%</span></span>
+<span id="cb66-13"><a href="#cb66-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">Y =</span> <span class="fu">sum</span>(DV, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb66-14"><a href="#cb66-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb66-15"><a href="#cb66-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Merge</span></span>
+<span id="cb66-16"><a href="#cb66-16" aria-hidden="true" tabindex="-1"></a>combined_data <span class="ot">&lt;-</span> baseline_data <span class="sc">%&gt;%</span></span>
+<span id="cb66-17"><a href="#cb66-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(y_data, <span class="at">by =</span> <span class="st">"ID"</span>)</span>
+<span id="cb66-18"><a href="#cb66-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb66-19"><a href="#cb66-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Obtain final modeling dataset. Note that RACE is removed as per the instructions. </span></span>
+<span id="cb66-20"><a href="#cb66-20" aria-hidden="true" tabindex="-1"></a>model_data <span class="ot">&lt;-</span> combined_data <span class="sc">%&gt;%</span></span>
+<span id="cb66-21"><a href="#cb66-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">SEX =</span> <span class="fu">factor</span>(SEX)) <span class="sc">%&gt;%</span></span>
+<span id="cb66-22"><a href="#cb66-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Y, DOSE, AGE, SEX, WT, HT)</span>
+<span id="cb66-23"><a href="#cb66-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb66-24"><a href="#cb66-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Train and test. </span></span>
+<span id="cb66-25"><a href="#cb66-25" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(rngseed)</span>
+<span id="cb66-26"><a href="#cb66-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb66-27"><a href="#cb66-27" aria-hidden="true" tabindex="-1"></a>data_split <span class="ot">&lt;-</span> <span class="fu">initial_split</span>(model_data, <span class="at">prop =</span> <span class="fl">0.75</span>)</span>
+<span id="cb66-28"><a href="#cb66-28" aria-hidden="true" tabindex="-1"></a>train_data <span class="ot">&lt;-</span> <span class="fu">training</span>(data_split)</span>
+<span id="cb66-29"><a href="#cb66-29" aria-hidden="true" tabindex="-1"></a>test_data  <span class="ot">&lt;-</span> <span class="fu">testing</span>(data_split)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="model-fitting-1" class="level1">
+<h1>Model Fitting</h1>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Model 1: DOSE only</span></span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a>model1 <span class="ot">&lt;-</span> <span class="fu">linear_reg</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"lm"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb67-4"><a href="#cb67-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit</span>(Y <span class="sc">~</span> DOSE, <span class="at">data =</span> train_data)</span>
+<span id="cb67-5"><a href="#cb67-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-6"><a href="#cb67-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Model 2: All predictors</span></span>
+<span id="cb67-7"><a href="#cb67-7" aria-hidden="true" tabindex="-1"></a>model2 <span class="ot">&lt;-</span> <span class="fu">linear_reg</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb67-8"><a href="#cb67-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"lm"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb67-9"><a href="#cb67-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit</span>(Y <span class="sc">~</span> DOSE <span class="sc">+</span> AGE <span class="sc">+</span> SEX <span class="sc">+</span> WT <span class="sc">+</span> HT, <span class="at">data =</span> train_data)</span>
+<span id="cb67-10"><a href="#cb67-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-11"><a href="#cb67-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Predictions</span></span>
+<span id="cb67-12"><a href="#cb67-12" aria-hidden="true" tabindex="-1"></a>pred1 <span class="ot">&lt;-</span> <span class="fu">predict</span>(model1, train_data) <span class="sc">%&gt;%</span></span>
+<span id="cb67-13"><a href="#cb67-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_cols</span>(train_data)</span>
+<span id="cb67-14"><a href="#cb67-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-15"><a href="#cb67-15" aria-hidden="true" tabindex="-1"></a>pred2 <span class="ot">&lt;-</span> <span class="fu">predict</span>(model2, train_data) <span class="sc">%&gt;%</span></span>
+<span id="cb67-16"><a href="#cb67-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_cols</span>(train_data)</span>
+<span id="cb67-17"><a href="#cb67-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-18"><a href="#cb67-18" aria-hidden="true" tabindex="-1"></a><span class="co"># RMSE for models</span></span>
+<span id="cb67-19"><a href="#cb67-19" aria-hidden="true" tabindex="-1"></a>rmse_model1 <span class="ot">&lt;-</span> <span class="fu">rmse</span>(pred1, <span class="at">truth =</span> Y, <span class="at">estimate =</span> .pred)</span>
+<span id="cb67-20"><a href="#cb67-20" aria-hidden="true" tabindex="-1"></a>rmse_model2 <span class="ot">&lt;-</span> <span class="fu">rmse</span>(pred2, <span class="at">truth =</span> Y, <span class="at">estimate =</span> .pred)</span>
+<span id="cb67-21"><a href="#cb67-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-22"><a href="#cb67-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Null model (mean prediction)</span></span>
+<span id="cb67-23"><a href="#cb67-23" aria-hidden="true" tabindex="-1"></a>mean_y <span class="ot">&lt;-</span> <span class="fu">mean</span>(train_data<span class="sc">$</span>Y)</span>
+<span id="cb67-24"><a href="#cb67-24" aria-hidden="true" tabindex="-1"></a>rmse_null <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">mean</span>((train_data<span class="sc">$</span>Y <span class="sc">-</span> mean_y)<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb67-25"><a href="#cb67-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-26"><a href="#cb67-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Print results</span></span>
+<span id="cb67-27"><a href="#cb67-27" aria-hidden="true" tabindex="-1"></a>rmse_null</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 948.3526</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a>rmse_model1</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 3
+  .metric .estimator .estimate
+  &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;
+1 rmse    standard        703.</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a>rmse_model2</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 3
+  .metric .estimator .estimate
+  &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;
+1 rmse    standard        627.</code></pre>
+</div>
+</div>
+<ul>
+<li>The RMSE of the null model is 948.</li>
+<li>The RMSE of Model 1 is 703.</li>
+<li>The RMSE of Model 2 is 627.</li>
+</ul>
+<p>The lower the RMSE, the better the prediction. * The null model assumes that there is no dose-response relationship (i.e., everyone has the same exposure). * Model 1 suggests that dose is the main driver behind drug exposure. * Model 2 suggests that covariates (age, sex, weight, height) have moderate affect on exposure. The dosage is the main driver, but these patient factors explain residual variability. This has the lowest RMSE value and is currently the best model.</p>
+</section>
+<section id="cross-validation" class="level1">
+<h1>Cross Validation</h1>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb73"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(rngseed)</span>
+<span id="cb73-2"><a href="#cb73-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb73-3"><a href="#cb73-3" aria-hidden="true" tabindex="-1"></a>folds <span class="ot">&lt;-</span> <span class="fu">vfold_cv</span>(train_data, <span class="at">v =</span> <span class="dv">10</span>)</span>
+<span id="cb73-4"><a href="#cb73-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb73-5"><a href="#cb73-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Model 1 CV</span></span>
+<span id="cb73-6"><a href="#cb73-6" aria-hidden="true" tabindex="-1"></a>model1_cv <span class="ot">&lt;-</span> <span class="fu">fit_resamples</span>(</span>
+<span id="cb73-7"><a href="#cb73-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">linear_reg</span>() <span class="sc">%&gt;%</span> <span class="fu">set_engine</span>(<span class="st">"lm"</span>),</span>
+<span id="cb73-8"><a href="#cb73-8" aria-hidden="true" tabindex="-1"></a>  Y <span class="sc">~</span> DOSE,</span>
+<span id="cb73-9"><a href="#cb73-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">resamples =</span> folds,</span>
+<span id="cb73-10"><a href="#cb73-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">metrics =</span> <span class="fu">metric_set</span>(rmse)</span>
+<span id="cb73-11"><a href="#cb73-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb73-12"><a href="#cb73-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb73-13"><a href="#cb73-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Model 2 CV</span></span>
+<span id="cb73-14"><a href="#cb73-14" aria-hidden="true" tabindex="-1"></a>model2_cv <span class="ot">&lt;-</span> <span class="fu">fit_resamples</span>(</span>
+<span id="cb73-15"><a href="#cb73-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">linear_reg</span>() <span class="sc">%&gt;%</span> <span class="fu">set_engine</span>(<span class="st">"lm"</span>),</span>
+<span id="cb73-16"><a href="#cb73-16" aria-hidden="true" tabindex="-1"></a>  Y <span class="sc">~</span> DOSE <span class="sc">+</span> AGE <span class="sc">+</span> SEX <span class="sc">+</span> WT <span class="sc">+</span> HT,</span>
+<span id="cb73-17"><a href="#cb73-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">resamples =</span> folds,</span>
+<span id="cb73-18"><a href="#cb73-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">metrics =</span> <span class="fu">metric_set</span>(rmse)</span>
+<span id="cb73-19"><a href="#cb73-19" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb73-20"><a href="#cb73-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb73-21"><a href="#cb73-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Collect CV results</span></span>
+<span id="cb73-22"><a href="#cb73-22" aria-hidden="true" tabindex="-1"></a>cv_results_model1 <span class="ot">&lt;-</span> <span class="fu">collect_metrics</span>(model1_cv)</span>
+<span id="cb73-23"><a href="#cb73-23" aria-hidden="true" tabindex="-1"></a>cv_results_model2 <span class="ot">&lt;-</span> <span class="fu">collect_metrics</span>(model2_cv)</span>
+<span id="cb73-24"><a href="#cb73-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb73-25"><a href="#cb73-25" aria-hidden="true" tabindex="-1"></a>cv_results_model1</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 6
+  .metric .estimator  mean     n std_err .config        
+  &lt;chr&gt;   &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;          
+1 rmse    standard    691.    10    67.5 pre0_mod0_post0</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a>cv_results_model2</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 6
+  .metric .estimator  mean     n std_err .config        
+  &lt;chr&gt;   &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;          
+1 rmse    standard    646.    10    64.8 pre0_mod0_post0</code></pre>
+</div>
 </div>
 
 
